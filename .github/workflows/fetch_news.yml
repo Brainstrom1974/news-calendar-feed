@@ -1,0 +1,58 @@
+# Datei-Speicherort im Repo: .github/workflows/fetch_news.yml
+#
+# Fuehrt fetch_news_calendar.py einmal taeglich automatisch aus, komplett
+# auf GitHub-Infrastruktur - laeuft unabhaengig davon, ob der Mac an oder
+# aus ist, und OHNE zusaetzliche VPS. Kostenlos fuer public Repos.
+#
+# Einrichtung:
+#   1. Diese Datei nach .github/workflows/fetch_news.yml im Repo legen
+#      (Ordner .github/workflows/ muss ggf. neu angelegt werden).
+#   2. fetch_news_calendar.py ins Hauptverzeichnis des Repos legen.
+#   3. Auf GitHub: Repo -> Settings -> Secrets and variables -> Actions ->
+#      "New repository secret" -> Name: JBLANKED_API_KEY, Wert: dein
+#      echter jblanked.com API-Key. NIE den Key direkt im Code speichern.
+#   4. Beides committen und pushen (git add .github/workflows/fetch_news.yml
+#      fetch_news_calendar.py && git commit -m "Add automation" && git push).
+#   5. Unter dem Tab "Actions" im Repo pruefen, ob der Lauf gruen ist.
+#      Manueller Test moeglich ueber "Run workflow" (workflow_dispatch,
+#      siehe unten), ohne auf die naechste Uhrzeit zu warten.
+
+name: Fetch News Calendar
+
+on:
+  schedule:
+    # 06:00 Zuerich-Zeit. GitHub Actions cron ist immer UTC; Zuerich ist im
+    # Sommer (MESZ) UTC+2, im Winter (MEZ) UTC+1 - unten auf UTC+2 gerechnet
+    # (04:00 UTC = 06:00 MESZ). Im Winterhalbjahr laeuft es dann effektiv
+    # 07:00 Zuerich-Zeit statt 06:00 - fuer den Zweck (vor dem ersten
+    # Handelsfenster) unproblematisch, bei Bedarf spaeter anpassen.
+    - cron: '0 4 * * *'
+  workflow_dispatch: {}   # erlaubt manuellen Start ueber den "Actions"-Tab, zum Testen
+
+permissions:
+  contents: write   # noetig, damit der Workflow die aktualisierte Datei zurueck ins Repo committen darf
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Abhaengigkeiten installieren
+        run: pip install requests
+
+      - name: Git-Identitaet setzen (fuer den automatischen Commit)
+        run: |
+          git config user.name "news-calendar-bot"
+          git config user.email "actions@github.com"
+
+      - name: News-Kalender abrufen und pushen
+        env:
+          JBLANKED_API_KEY: ${{ secrets.JBLANKED_API_KEY }}
+        run: python3 fetch_news_calendar.py
