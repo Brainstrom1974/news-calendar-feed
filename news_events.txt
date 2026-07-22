@@ -1,0 +1,9 @@
+# Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
+# Generiert: 2026-07-22 15:24 UTC
+# Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
+2026-07-22 12:00|GBP|HIGH|CPI y/y
+2026-07-22 12:00|GBP|HIGH|Core CPI y/y
+2026-07-22 11:00|GBP|HIGH|CPI y/y
+2026-07-22 11:00|GBP|HIGH|Core CPI y/y
+2026-07-21 12:00|GBP|HIGH|Average Earnings Index 3m/y
+2026-07-21 12:00|GBP|HIGH|Unemployment Rate
