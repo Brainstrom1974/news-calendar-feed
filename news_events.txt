@@ -1,5 +1,5 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-07-24 07:14 UTC
+# Generiert: 2026-07-24 11:14 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 2026-07-23 18:15|EUR|HIGH|Main Refinancing Rate
 2026-07-22 12:00|GBP|HIGH|CPI y/y
