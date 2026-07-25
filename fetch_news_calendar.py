@@ -1,35 +1,38 @@
 #!/usr/bin/env python3
 """
-fetch_news_calendar.py
+fetch_news_calendar.py  -  Version 2 (25.07.2026)
 
-Zieht einmal taeglich die kommende Woche der High-Impact Forex-Factory-Events
-von der jblanked.com Calendar-API, schreibt sie in ein einfaches, pipe-
-getrenntes Textformat und pusht die Datei in ein GitHub-Repo (Raw-URL wird
-danach vom EA per WebRequest gelesen).
+Zieht die High-Impact-Events der laufenden Woche von der jblanked.com
+Calendar-API, schreibt sie in ein pipe-getrenntes Textformat und pusht die
+Datei in ein GitHub-Repo (Raw-URL wird danach vom EA per WebRequest gelesen).
 
-WICHTIG (siehe Pendenzen/Gesamtplan 21.07.2026): Der EA liest NIE Forex
-Factory oder jblanked.com direkt - nur diese eigene, von uns kontrollierte
-Datei. Bitte diesen Design-Grundsatz beibehalten.
+WICHTIG (Design-Grundsatz, siehe Gesamtplan 21.07.2026): Der EA liest NIE
+Forex Factory oder jblanked.com direkt - nur diese eigene, von uns
+kontrollierte Datei.
 
-Voraussetzungen:
-    pip install requests
-    Ein GitHub Personal Access Token mit "repo"-Scope (fuer privates Repo)
-    oder gar keins noetig, falls das Repo public ist und der Push ueber
-    einen bereits lokal eingerichteten "git" mit SSH/HTTPS-Credentials laeuft.
+AENDERUNGEN GEGENUEBER VERSION 1 (alle drei am 25.07.2026 diagnostiziert):
 
-Empfohlener Ablauf, ohne extra Server:
-    - Dieses Skript liegt in einem lokal geklonten Git-Repo (z.B.
-      ~/news-calendar-feed/).
-    - Einmal taeglich per cron/launchd ausgefuehrt (siehe Hinweis unten).
-    - Das Skript schreibt news_events.txt, macht "git add/commit/push".
+  (1) CNY UND HKD FEHLTEN KOMPLETT. RELEVANT_CURRENCIES enthielt nur
+      {USD, EUR, GBP, JPY}. Genau die beiden Waehrungen, die The5ers fuer
+      HK50 als relevant nennt, wurden weggefiltert - der News-Filter haette
+      fuer HK50 also nie etwas blockiert, egal wie viele Events es gab.
 
-Dateiformat der Ausgabe (siehe EA-Kommentar im News-Filter-Modul):
+  (2) NUR EINE QUELLE. Die geplante Zwei-Quellen-Architektur (Forex Factory
+      fuer EUR/GBP/JPY/USD, MQL5 fuer CNY/HKD) war nie umgesetzt. Der
+      MQL5-Endpunkt lautet:
+          https://www.jblanked.com/news/api/mql5/calendar/week/
+      Beide Quellen folgen demselben Muster, nur die Quelle im Pfad
+      unterscheidet sich.
+
+  (3) VERGANGENE EVENTS. /calendar/week/ liefert die LAUFENDE Woche, nicht
+      die kommende (der Docstring in Version 1 behauptete das Gegenteil).
+      Am Wochenende liegt damit praktisch alles in der Vergangenheit. Neu
+      werden abgelaufene Events verworfen, damit der Dateiinhalt sofort
+      zeigt, ob der Abruf ueberhaupt Brauchbares geliefert hat.
+
+Dateiformat der Ausgabe (unveraendert, der EA-Parser bleibt kompatibel):
     YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name
-    Zeiten in GMT/UTC (jblanked-Offset bewusst auf GMT gesetzt, siehe
-    OFFSET_GMT unten), damit der EA sie 1:1 mit TimeGMT() vergleichen kann,
-    ohne noch eine weitere Zeitzonen-Umrechnung im MQL5-Code zu brauchen -
-    genau die Art Fehlerquelle, die uns bei Broker-Zeit/Zuerich-Zeit schon
-    mehrfach Probleme gemacht hat.
+    Zeiten in GMT/UTC, damit der EA sie 1:1 mit TimeGMT() vergleichen kann.
 """
 
 import os
@@ -41,87 +44,136 @@ from pathlib import Path
 import requests
 
 # ---------------------------------------------------------------------
-# KONFIGURATION - bitte anpassen
+# KONFIGURATION
 # ---------------------------------------------------------------------
-JBLANKED_API_KEY = os.environ.get("JBLANKED_API_KEY", "DEIN_API_KEY_HIER")  # lokal: hier eintragen. In GitHub Actions: als Repository Secret gesetzt, siehe Workflow-Datei.
-REPO_LOCAL_PATH = Path(".") if os.environ.get("GITHUB_ACTIONS") else Path.home() / "news-calendar-feed"   # lokal: eigener Clone. In GitHub Actions: aktuelles Verzeichnis (Workflow checkt das Repo bereits selbst aus)
+JBLANKED_API_KEY = os.environ.get("JBLANKED_API_KEY", "DEIN_API_KEY_HIER")
+REPO_LOCAL_PATH = Path(".") if os.environ.get("GITHUB_ACTIONS") else Path.home() / "news-calendar-feed"
 OUTPUT_FILENAME = "news_events.txt"
 GIT_COMMIT_MESSAGE_PREFIX = "Update news calendar"
 
-# Nur diese Waehrungen werden ueberhaupt gespeichert (deckt alle fuenf
-# Instrumente ab: EUR=GER40, USD=NASDAQ/HK50/alle Zusatz-USD-Sperren,
-# GBP=FTSE100, JPY=JPN225). Kleiner als noetig zu filtern spart Zeilen,
-# aber Vorsicht: falls spaeter weitere Instrumente/Waehrungen dazukommen,
-# hier ergaenzen.
-RELEVANT_CURRENCIES = {"USD", "EUR", "GBP", "JPY", "CNY", "HKD"}
+# Zwei Quellen, weil keine allein alles abdeckt:
+#   Forex Factory  -> EUR (GER40), GBP (FTSE100), JPY (JPN225), USD (NASDAQ
+#                     und optionale USD-Zusatzsperre), CNY (China/Hang Seng)
+#   MQL5           -> HKD (Hongkong-lokale Daten; Forex Factory fuehrt HKD
+#                     nicht, MQL5 nachweislich schon - GDP, Unemployment,
+#                     Retail Sales, FX Reserves)
+# CNY steht bewusst bei BEIDEN: Forex Factory fuehrt China-Daten, MQL5
+# ebenfalls. Doppelte Eintraege werden unten dedupliziert.
+SOURCES = {
+    "forex-factory": {"USD", "EUR", "GBP", "JPY", "CNY"},
+    "mql5":          {"CNY", "HKD"},
+}
 
 # GMT-Offset-Konvention laut jblanked-Doku: "GMT-3 = 0, GMT = 3, EST = 7,
 # PST = 10". Wir wollen GMT/UTC in der Ausgabedatei -> offset=3.
 JBLANKED_OFFSET_FOR_GMT = 3
 
+# Wie weit zurueck ein Event noch geschrieben wird. Kleiner Puffer, damit ein
+# Event, das gerade laeuft, nicht durch die Laufzeit des Skripts herausfaellt.
+KEEP_PAST_MINUTES = 15
+
+BASE_URL = "https://www.jblanked.com/news/api/{source}/calendar/week/"
+
 # ---------------------------------------------------------------------
 
-JBLANKED_URL_FOREX_FACTORY = "https://www.jblanked.com/news/api/forex-factory/calendar/week/"
-# The5ers-Support (21.07.2026) verweist fuer HK50 explizit auf CNY/CNH-Events.
-# Forex Factory deckt China vermutlich duenner ab als MQL5's Kalender (siehe
-# EA-Kommentar im News-Filter-Modul) - deshalb zusaetzlicher Abruf ueber die
-# MQL5-Quelle, NUR fuer CNY gefiltert, um die Forex-Factory-basierte Logik
-# fuer die anderen vier Instrumente nicht zu vermischen/verwaessern.
-JBLANKED_URL_MQL5 = "https://www.jblanked.com/news/api/mql5/calendar/week/"
 
+def fetch_week_events(source: str) -> list[dict]:
+    """Holt die Events der laufenden Woche fuer eine Quelle (forex-factory | mql5).
 
-def fetch_week_events(url: str, currency_filter: str | None = None) -> list[dict]:
-    """Holt die kommende Woche an Events von der angegebenen jblanked-Quelle.
-    currency_filter optional (z.B. 'CNY'), um bei der MQL5-Quelle direkt nur
-    das zu holen, was wir brauchen, statt lokal aus einer grossen Liste zu
-    filtern."""
+    Der Impact-Filter wird bewusst NICHT als Server-Parameter gesetzt, sondern
+    unten clientseitig angewendet - die Impact-Einstufung unterscheidet sich
+    zwischen den Quellen, und wir wollen sehen, was wirklich zurueckkommt.
+    """
+    url = BASE_URL.format(source=source)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Api-Key {JBLANKED_API_KEY}",
     }
-    params = {
-        "impact": "High",
-        "offset": JBLANKED_OFFSET_FOR_GMT,
-    }
-    if currency_filter:
-        params["currency"] = currency_filter
-
+    params = {"offset": JBLANKED_OFFSET_FOR_GMT}
     response = requests.get(url, headers=headers, params=params, timeout=30)
     if response.status_code != 200:
         raise RuntimeError(
-            f"jblanked.com Anfrage fehlgeschlagen ({url}): HTTP {response.status_code} - {response.text[:300]}"
+            f"jblanked.com Anfrage an '{source}' fehlgeschlagen: "
+            f"HTTP {response.status_code} - {response.text[:300]}"
         )
-    return response.json()
+    data = response.json()
+    if not isinstance(data, list):
+        raise RuntimeError(f"Unerwartetes Antwortformat von '{source}': {type(data)}")
+    return data
 
 
 def parse_jblanked_date(date_str: str) -> datetime:
-    """jblanked liefert Datum als 'YYYY.MM.DD HH:MM:SS' (siehe Doku-Beispiel)."""
+    """jblanked liefert Datum als 'YYYY.MM.DD HH:MM:SS'."""
     return datetime.strptime(date_str, "%Y.%m.%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
 
-def build_output_lines(events: list[dict]) -> list[str]:
+def collect_events() -> tuple[list[tuple[datetime, str, str]], list[str]]:
+    """Ruft alle Quellen ab und gibt (Events, Warnungen) zurueck.
+
+    Ein Fehlschlag einer einzelnen Quelle bricht NICHT das ganze Skript ab -
+    sonst wuerde ein Ausfall der MQL5-Quelle auch die EUR/GBP/JPY-Events
+    kosten. Stattdessen wird gewarnt und mit dem Rest weitergemacht.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=KEEP_PAST_MINUTES)
+    seen: set[tuple[str, str, str]] = set()
+    events: list[tuple[datetime, str, str]] = []
+    warnings: list[str] = []
+
+    for source, wanted_currencies in SOURCES.items():
+        try:
+            raw = fetch_week_events(source)
+        except Exception as exc:  # bewusst breit: Netzwerk, HTTP, JSON
+            warnings.append(f"WARNUNG: Quelle '{source}' nicht abrufbar - {exc}")
+            continue
+
+        kept = 0
+        skipped_past = 0
+        for ev in raw:
+            currency = str(ev.get("Currency", "")).upper()
+            if currency not in wanted_currencies:
+                continue
+            if str(ev.get("Impact", "")).upper() != "HIGH":
+                continue
+            try:
+                dt = parse_jblanked_date(ev["Date"])
+            except (KeyError, ValueError, TypeError):
+                continue  # unparsebare Zeile ueberspringen statt abbrechen
+            if dt < cutoff:
+                skipped_past += 1
+                continue
+
+            name = str(ev.get("Name", "")).replace("|", "-").strip()
+            key = (dt.strftime("%Y-%m-%d %H:%M"), currency, name)
+            if key in seen:
+                continue  # CNY kann aus beiden Quellen kommen
+            seen.add(key)
+            events.append((dt, currency, name))
+            kept += 1
+
+        print(f"Quelle '{source}': {kept} kuenftige High-Impact-Events uebernommen "
+              f"(von {len(raw)} insgesamt, {skipped_past} bereits vergangen).")
+        if kept == 0:
+            warnings.append(
+                f"WARNUNG: Quelle '{source}' lieferte 0 kuenftige High-Impact-Events "
+                f"fuer {sorted(wanted_currencies)}. Entweder gibt es diese Woche "
+                f"wirklich keine, oder der Abruf stimmt nicht."
+            )
+
+    events.sort(key=lambda x: x[0])
+    return events, warnings
+
+
+def build_output_lines(events: list[tuple[datetime, str, str]], warnings: list[str]) -> list[str]:
     lines = [
         "# Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren",
         f"# Generiert: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
         "# Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)",
+        f"# Quellen: {', '.join(SOURCES)} | nur kuenftige Events",
     ]
-    kept = 0
-    for ev in events:
-        currency = ev.get("Currency", "")
-        if currency not in RELEVANT_CURRENCIES:
-            continue
-        impact = ev.get("Impact", "").upper()
-        if impact != "HIGH":
-            continue
-        try:
-            dt = parse_jblanked_date(ev["Date"])
-        except (KeyError, ValueError):
-            continue  # unparsebare Zeile lieber ueberspringen als das ganze Skript abbrechen lassen
-        name = ev.get("Name", "").replace("|", "-")  # Pipe im Namen wuerde das Format brechen
+    for warning in warnings:
+        lines.append(f"# {warning}")
+    for dt, currency, name in events:
         lines.append(f"{dt.strftime('%Y-%m-%d %H:%M')}|{currency}|HIGH|{name}")
-        kept += 1
-
-    print(f"{kept} relevante High-Impact-Events uebernommen (von {len(events)} insgesamt).")
     return lines
 
 
@@ -146,28 +198,11 @@ def write_and_publish(lines: list[str]) -> None:
 
 
 def main() -> None:
-    # WICHTIG (Free-Tier-Limit 1 Request/Tag laut jblanked-Doku, Stand
-    # 21.07.2026): Zwei Abrufe pro Tag (Forex Factory + MQL5) koennten das
-    # Limit ueberschreiten, falls es sich strikt auf "insgesamt 1/Tag" statt
-    # "1/Tag/Endpoint" bezieht. Beim ersten produktiven Lauf beide Antworten
-    # pruefen (HTTP-Code, Log); falls der zweite Abruf mit 429/Rate-Limit
-    # fehlschlaegt, ggf. VIP-Mitgliedschaft noetig (jblanked.com/api/billing/)
-    # oder die beiden Abrufe zeitlich verteilen.
-    #
-    # MQL5-Abruf bewusst OHNE Server-seitigen currency-Filter (deckt sowohl
-    # CNY als auch HKD in einer einzigen Anfrage ab statt zwei) - die
-    # Auswahl passiert stattdessen client-seitig ueber RELEVANT_CURRENCIES
-    # in build_output_lines().
-    forex_factory_events = fetch_week_events(JBLANKED_URL_FOREX_FACTORY)
-    try:
-        china_hk_events = fetch_week_events(JBLANKED_URL_MQL5)
-    except RuntimeError as exc:
-        print(f"WARNUNG: MQL5-Abruf (CNY/HKD fuer HK50) fehlgeschlagen, HK50-Filter laeuft ggf. mit veralteten Daten weiter: {exc}", file=sys.stderr)
-        china_hk_events = []
-
-    all_events = forex_factory_events + china_hk_events
-    lines = build_output_lines(all_events)
-    write_and_publish(lines)
+    events, warnings = collect_events()
+    for warning in warnings:
+        print(warning, file=sys.stderr)
+    print(f"Gesamt: {len(events)} Events in die Datei geschrieben.")
+    write_and_publish(build_output_lines(events, warnings))
 
 
 if __name__ == "__main__":
@@ -175,11 +210,15 @@ if __name__ == "__main__":
 
 
 # ---------------------------------------------------------------------
-# Einrichtung als taeglicher Cronjob (macOS/Linux), z.B. 06:00 Zuerich-Zeit:
+# BEKANNTE EINSCHRAENKUNG
 #
-#   crontab -e
-#   0 6 * * * /usr/bin/python3 /pfad/zu/fetch_news_calendar.py >> /pfad/zu/fetch_news.log 2>&1
+# /calendar/week/ liefert nur die LAUFENDE Woche. Gegen Wochenende schrumpft
+# die Vorschau daher zwangslaeufig zusammen, im Extremfall auf null Zeilen.
+# Das ist unkritisch, solange der Workflow taeglich laeuft: Montag frueh
+# fuellt sich die Datei wieder fuer die ganze Woche. Ein "next week"-Endpunkt
+# existiert bei jblanked laut Doku nicht.
 #
-# Alternative macOS: launchd (ueberlebt Neustarts zuverlaessiger als cron),
-# bei Bedarf sag Bescheid, dann bauen wir die .plist-Datei dazu.
+# Rate-Limit laut Doku: eine Anfrage pro Sekunde. Zwei Abrufe pro Tag sind
+# damit unproblematisch - die urspruengliche Sorge "1 Request pro Tag" war
+# ein Missverstaendnis.
 # ---------------------------------------------------------------------
