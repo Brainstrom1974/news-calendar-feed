@@ -201,6 +201,27 @@ def main() -> None:
     events, warnings = collect_events()
     for warning in warnings:
         print(warning, file=sys.stderr)
+
+    # SCHUTZ (26.07.2026): Eine leere Ergebnisliste darf eine bestehende, gefuellte
+    # Datei NICHT ueberschreiben. Sonst loescht ein Wochenendlauf - bei dem die
+    # laufende Woche zwangslaeufig abgelaufen ist - oder ein voruebergehender
+    # API-Ausfall die Termine, die der EA am Montag frueh braucht. Lieber eine
+    # leicht veraltete Datei behalten als gar keine: Der EA verwirft abgelaufene
+    # Events ohnehin selbst, eine leere Datei dagegen bedeutet "nie sperren".
+    if not events:
+        output_path = REPO_LOCAL_PATH / OUTPUT_FILENAME
+        if output_path.exists() and output_path.stat().st_size > 0:
+            print(
+                "HINWEIS: 0 kuenftige Events ermittelt - bestehende "
+                f"{OUTPUT_FILENAME} bleibt unveraendert erhalten (kein Ueberschreiben, "
+                "kein Commit)."
+            )
+            return
+        print(
+            f"HINWEIS: 0 kuenftige Events und keine bestehende {OUTPUT_FILENAME} - "
+            "es wird eine Datei nur mit Kopfzeilen angelegt."
+        )
+
     print(f"Gesamt: {len(events)} Events in die Datei geschrieben.")
     write_and_publish(build_output_lines(events, warnings))
 
