@@ -1,10 +1,6 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-07-25 10:09 UTC
+# Generiert: 2026-07-25 22:54 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
-2026-07-23 18:15|EUR|HIGH|Main Refinancing Rate
-2026-07-22 12:00|GBP|HIGH|CPI y/y
-2026-07-22 12:00|GBP|HIGH|Core CPI y/y
-2026-07-22 11:00|GBP|HIGH|CPI y/y
-2026-07-22 11:00|GBP|HIGH|Core CPI y/y
-2026-07-21 12:00|GBP|HIGH|Average Earnings Index 3m/y
-2026-07-21 12:00|GBP|HIGH|Unemployment Rate
+# Quellen: forex-factory, mql5 | nur kuenftige Events
+# WARNUNG: Quelle 'forex-factory' lieferte 0 kuenftige High-Impact-Events fuer ['CNY', 'EUR', 'GBP', 'JPY', 'USD']. Entweder gibt es diese Woche wirklich keine, oder der Abruf stimmt nicht.
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNY', 'HKD']. Entweder gibt es diese Woche wirklich keine, oder der Abruf stimmt nicht.
