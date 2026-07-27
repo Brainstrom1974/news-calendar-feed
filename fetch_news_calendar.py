@@ -1,6 +1,7 @@
+
 #!/usr/bin/env python3
 """
-fetch_news_calendar.py  -  Version 3 (27.07.2026)
+fetch_news_calendar.py  -  Version 4 (27.07.2026)
 
 Zieht High-Impact-Events von der jblanked.com Calendar-API, schreibt sie in
 ein pipe-getrenntes Textformat und pusht die Datei in ein GitHub-Repo
@@ -9,6 +10,21 @@ ein pipe-getrenntes Textformat und pusht die Datei in ein GitHub-Repo
 WICHTIG (Design-Grundsatz, siehe Gesamtplan 21.07.2026): Der EA liest NIE
 Forex Factory oder jblanked.com direkt - nur diese eigene, von uns
 kontrollierte Datei.
+
+AENDERUNGEN GEGENUEBER VERSION 3 (27.07.2026, gleicher Tag):
+
+  (0) ENDPUNKT-VARIANTEN WERDEN DURCHPROBIERT. Version 3 lieferte fuer
+      BEIDE Quellen exakt dieselben zwei Datensaetze ("SPPI y/y", JPY,
+      Impact "None", Event_ID 0) - obwohl forex-factory und mql5 voellig
+      verschiedene Kalender sind und in dieser Woche u.a. der FED-Zins-
+      entscheid ansteht. Die Antwort ist also nachweislich falsch, nicht
+      nur leer. Verdacht: der Parameter "offset" wird vom range-Endpunkt
+      nicht als Zeitzone (so die Doku), sondern als Paginierung gedeutet.
+      Statt zu raten probiert das Skript nun mehrere Endpunkt-/Parameter-
+      Kombinationen durch, protokolliert je Variante HTTP-Status, Anzahl
+      Rohdatensaetze und die vorkommenden Impact-Werte, und verwendet
+      danach die ergiebigste. Sobald eine Variante genug brauchbare Daten
+      liefert, wird abgebrochen - das spart Credits.
 
 AENDERUNGEN GEGENUEBER VERSION 2 (27.07.2026):
 
@@ -71,7 +87,14 @@ SOURCES = {
 
 # GMT-Offset-Konvention laut jblanked-Doku: "GMT-3 = 0, GMT = 3, EST = 7,
 # PST = 10". Wir wollen GMT/UTC in der Ausgabedatei -> offset=3.
+# ACHTUNG: Ob der range-Endpunkt diesen Parameter wirklich so versteht, ist
+# unbestaetigt - siehe Aenderung (0) oben. Deshalb wird er unten auch in
+# einer Variante ohne offset probiert.
 JBLANKED_OFFSET_FOR_GMT = 3
+
+# Ab so vielen Rohdatensaetzen gilt eine Variante als brauchbar; die
+# restlichen Varianten werden dann nicht mehr abgerufen (spart Credits).
+MIN_USABLE_RAW = 10
 
 # Wie weit zurueck ein Event noch geschrieben wird. Kleiner Puffer, damit ein
 # Event, das gerade laeuft, nicht durch die Laufzeit des Skripts herausfaellt.
@@ -83,6 +106,7 @@ RANGE_DAYS = 10
 
 RANGE_URL = "https://www.jblanked.com/news/api/{source}/calendar/range/"
 WEEK_URL = "https://www.jblanked.com/news/api/{source}/calendar/week/"
+TODAY_URL = "https://www.jblanked.com/news/api/{source}/calendar/today/"
 
 # Diagnose-Ausgabe im Actions-Log. Kostet keine zusaetzlichen API-Credits,
 # sondern protokolliert nur, was ohnehin abgerufen wurde.
@@ -117,38 +141,56 @@ def _get(url: str, params: dict, label: str) -> list[dict]:
     return data
 
 
+def _variants(source: str) -> list[tuple[str, str, dict]]:
+    """Zu probierende Endpunkt-/Parameter-Kombinationen, ergiebigste zuerst."""
+    today = datetime.now(timezone.utc).date()
+    until = today + timedelta(days=RANGE_DAYS)
+    frm, to = today.strftime("%Y-%m-%d"), until.strftime("%Y-%m-%d")
+    return [
+        ("range ohne offset", RANGE_URL.format(source=source), {"from": frm, "to": to}),
+        ("range mit offset",  RANGE_URL.format(source=source), {"from": frm, "to": to, "offset": JBLANKED_OFFSET_FOR_GMT}),
+        ("week ohne offset",  WEEK_URL.format(source=source),  {}),
+        ("week mit offset",   WEEK_URL.format(source=source),  {"offset": JBLANKED_OFFSET_FOR_GMT}),
+        ("today",             TODAY_URL.format(source=source), {}),
+    ]
+
+
 def fetch_events(source: str) -> list[dict]:
-    """Holt die Events einer Quelle - zuerst per Datumsbereich, sonst Woche.
+    """Probiert die Varianten durch und gibt die ergiebigste Antwort zurueck.
 
     Der Impact-Filter wird bewusst NICHT als Server-Parameter gesetzt,
     sondern unten clientseitig angewendet: Die Impact-Einstufung
     unterscheidet sich zwischen den Quellen, und wir wollen im Log sehen,
     was wirklich zurueckkommt.
     """
-    today = datetime.now(timezone.utc).date()
-    until = today + timedelta(days=RANGE_DAYS)
+    best_label, best_data = None, []
 
-    try:
-        data = _get(
-            RANGE_URL.format(source=source),
-            {
-                "from": today.strftime("%Y-%m-%d"),
-                "to": until.strftime("%Y-%m-%d"),
-                "offset": JBLANKED_OFFSET_FOR_GMT,
-            },
-            f"{source}/range {today}..{until}",
-        )
-        if data:
+    for label, url, params in _variants(source):
+        try:
+            data = _get(url, params, f"{source} [{label}]")
+        except Exception as exc:
+            print(f"[DIAG] {source} [{label}]: nicht nutzbar - {exc}")
+            continue
+
+        impacts = sorted({str(ev.get("Impact", "<fehlt>")) for ev in data}) if data else []
+        high = sum(1 for ev in data if str(ev.get("Impact", "")).upper() == "HIGH")
+        print(f"[DIAG] {source} [{label}]: {len(data)} Rohdatensaetze, "
+              f"davon {high} mit Impact HIGH, Impact-Werte {impacts}")
+
+        if len(data) > len(best_data):
+            best_label, best_data = label, data
+
+        if len(data) >= MIN_USABLE_RAW and high > 0:
+            print(f"[DIAG] {source}: Variante '{label}' ist brauchbar - "
+                  f"restliche Varianten werden uebersprungen.")
             return data
-        print(f"[DIAG] {source}: range lieferte 0 Rohdatensaetze - versuche week")
-    except Exception as exc:
-        print(f"[DIAG] {source}: range nicht nutzbar ({exc}) - versuche week")
 
-    return _get(
-        WEEK_URL.format(source=source),
-        {"offset": JBLANKED_OFFSET_FOR_GMT},
-        f"{source}/week",
-    )
+    if best_label is None:
+        raise RuntimeError(f"Keine Variante lieferte eine verwertbare Antwort fuer '{source}'.")
+
+    print(f"[DIAG] {source}: keine Variante war eindeutig brauchbar - "
+          f"verwende die ergiebigste ('{best_label}', {len(best_data)} Datensaetze).")
+    return best_data
 
 
 def describe_raw(source: str, raw: list[dict]) -> None:
@@ -329,9 +371,11 @@ if __name__ == "__main__":
 # ---------------------------------------------------------------------
 # HINWEISE
 #
-# Credits: Ein Abruf kostet 1 Credit. Dieses Skript macht pro Lauf einen
-# Abruf je Quelle, also zwei - plus hoechstens zwei weitere, falls der
-# range-Endpunkt ausfaellt und auf week zurueckgefallen wird.
+# Credits: Ein Abruf kostet 1 Credit. Solange die Varianten-Probe aktiv ist,
+# kostet ein Lauf bis zu fuenf Abrufe je Quelle, also hoechstens zehn - in
+# der Regel weniger, weil nach der ersten brauchbaren Variante abgebrochen
+# wird. Sobald klar ist, welche Variante funktioniert, sollte die Liste in
+# _variants() auf genau diese eine gekuerzt werden (dann wieder 2 pro Lauf).
 #
 # GitHub-Actions-Zeitplan: Geplante Laeufe wurden am 23.-26.07.2026
 # nachweislich um sechs bis siebeneinhalb Stunden verzoegert ausgefuehrt.
