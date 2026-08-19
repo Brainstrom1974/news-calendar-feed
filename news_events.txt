@@ -1,9 +1,10 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-08-13 08:51 UTC
+# Generiert: 2026-08-19 05:16 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 38 Rohdatensaetzen). Aussortiert: Waehrung 38, Impact 0, Datumsformat 0, vergangen 0.
-2026-08-13 09:00|GBP|HIGH|GDP m/m
-2026-08-13 09:00|GBP|HIGH|Prelim GDP q/q
-2026-08-13 15:30|USD|HIGH|Core PPI m/m
-2026-08-13 15:30|USD|HIGH|PPI m/m
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 56 Rohdatensaetzen). Aussortiert: Waehrung 56, Impact 0, Datumsformat 0, vergangen 0.
+2026-08-19 09:00|GBP|HIGH|CPI y/y
+2026-08-19 09:00|GBP|HIGH|Core CPI y/y
+2026-08-19 10:10|EUR|HIGH|ECB President Lagarde Speaks
+2026-08-19 13:15|EUR|HIGH|ECB President Lagarde Speaks
+2026-08-19 21:00|USD|HIGH|FOMC Meeting Minutes
