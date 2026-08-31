@@ -1,9 +1,12 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-08-27 14:53 UTC
+# Generiert: 2026-08-31 10:19 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 57 Rohdatensaetzen). Aussortiert: Waehrung 57, Impact 0, Datumsformat 0, vergangen 0.
-2026-08-28 01:30|JPY|HIGH|Tokyo Core CPI y/y
-2026-08-28 01:30|JPY|HIGH|Unemployment Rate
-2026-08-28 02:30|JPY|HIGH|Tokyo Core CPI y/y
-2026-08-28 02:30|JPY|HIGH|Unemployment Rate
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 104 Rohdatensaetzen). Aussortiert: Waehrung 104, Impact 0, Datumsformat 0, vergangen 0.
+2026-09-01 12:00|EUR|HIGH|Unemployment Rate
+2026-09-01 17:00|USD|HIGH|JOLTS Job Openings
+2026-09-03 12:00|EUR|HIGH|PPI m/m
+2026-09-04 11:50|GBP|HIGH|BOE Gov Bailey Speaks
+2026-09-04 15:30|USD|HIGH|Average Hourly Earnings m/m
+2026-09-04 15:30|USD|HIGH|Non-Farm Employment Change
+2026-09-04 15:30|USD|HIGH|Unemployment Rate
