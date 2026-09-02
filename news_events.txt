@@ -1,10 +1,8 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-01 09:03 UTC
+# Generiert: 2026-09-02 08:16 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 95 Rohdatensaetzen). Aussortiert: Waehrung 95, Impact 0, Datumsformat 0, vergangen 0.
-2026-09-01 12:00|EUR|HIGH|Unemployment Rate
-2026-09-01 17:00|USD|HIGH|JOLTS Job Openings
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 59 Rohdatensaetzen). Aussortiert: Waehrung 59, Impact 0, Datumsformat 0, vergangen 0.
 2026-09-03 12:00|EUR|HIGH|PPI m/m
 2026-09-04 11:50|GBP|HIGH|BOE Gov Bailey Speaks
 2026-09-04 15:30|USD|HIGH|Average Hourly Earnings m/m
