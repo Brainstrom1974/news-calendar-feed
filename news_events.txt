@@ -1,15 +1,33 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-07 08:47 UTC
+# Generiert: 2026-09-08 08:28 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 58 Rohdatensaetzen). Aussortiert: Waehrung 58, Impact 0, Datumsformat 0, vergangen 0.
-2026-09-08 02:30|JPY|HIGH|Average Cash Earnings y/y
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 161 Rohdatensaetzen). Aussortiert: Waehrung 161, Impact 0, Datumsformat 0, vergangen 0.
+2026-09-09 19:00|EUR|HIGH|ECB President Lagarde Speaks
 2026-09-09 20:00|EUR|HIGH|ECB President Lagarde Speaks
+2026-09-10 14:15|EUR|HIGH|Main Refinancing Rate
+2026-09-10 14:30|USD|HIGH|Core PPI m/m
+2026-09-10 14:30|USD|HIGH|PPI m/m
 2026-09-10 15:15|EUR|HIGH|Main Refinancing Rate
 2026-09-10 15:30|USD|HIGH|Core PPI m/m
 2026-09-10 15:30|USD|HIGH|PPI m/m
+2026-09-11 01:50|JPY|HIGH|PPI y/y
 2026-09-11 02:50|JPY|HIGH|PPI y/y
+2026-09-11 08:00|GBP|HIGH|GDP m/m
+2026-09-11 14:30|USD|HIGH|Core CPI m/m
+2026-09-11 14:30|USD|HIGH|Core CPI y/y
+2026-09-11 14:30|USD|HIGH|CPI m/m
+2026-09-11 14:30|USD|HIGH|CPI y/y
 2026-09-11 15:30|USD|HIGH|Core CPI m/m
 2026-09-11 15:30|USD|HIGH|CPI m/m
+2026-09-11 16:00|EUR|HIGH|ECB President Lagarde Speaks
 2026-09-11 17:00|EUR|HIGH|ECB President Lagarde Speaks
+2026-09-12 09:30|EUR|HIGH|ECB President Lagarde Speaks
 2026-09-12 10:30|EUR|HIGH|ECB President Lagarde Speaks
+2026-09-15 08:00|GBP|HIGH|Average Earnings Index 3m/y
+2026-09-15 08:00|GBP|HIGH|Unemployment Rate
+2026-09-16 08:00|GBP|HIGH|CPI y/y
+2026-09-16 20:30|USD|HIGH|FOMC Press Conference
+2026-09-17 00:00|JPY|HIGH|BOJ Policy Rate
+2026-09-17 13:00|GBP|HIGH|Official Bank Rate
+2026-09-18 00:00|JPY|HIGH|BOJ Press Conference
