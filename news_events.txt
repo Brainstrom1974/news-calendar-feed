@@ -1,12 +1,8 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-10 08:33 UTC
+# Generiert: 2026-09-11 08:27 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 39 Rohdatensaetzen). Aussortiert: Waehrung 39, Impact 0, Datumsformat 0, vergangen 0.
-2026-09-10 15:15|EUR|HIGH|Main Refinancing Rate
-2026-09-10 15:30|USD|HIGH|Core PPI m/m
-2026-09-10 15:30|USD|HIGH|PPI m/m
-2026-09-11 02:50|JPY|HIGH|PPI y/y
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 23 Rohdatensaetzen). Aussortiert: Waehrung 23, Impact 0, Datumsformat 0, vergangen 0.
 2026-09-11 09:00|GBP|HIGH|GDP m/m
 2026-09-11 15:30|USD|HIGH|Core CPI m/m
 2026-09-11 15:30|USD|HIGH|CPI m/m
