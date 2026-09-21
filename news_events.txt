@@ -1,6 +1,7 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-20 08:57 UTC
+# Generiert: 2026-09-21 09:28 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 58 Rohdatensaetzen). Aussortiert: Waehrung 58, Impact 0, Datumsformat 0, vergangen 0.
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 68 Rohdatensaetzen). Aussortiert: Waehrung 68, Impact 0, Datumsformat 0, vergangen 0.
 2026-09-29 08:00|JPY|HIGH|BOJ Core CPI y/y
+2026-09-30 15:30|USD|HIGH|Core PCE Price Index m/m
