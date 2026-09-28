@@ -1,5 +1,5 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-27 09:41 UTC
+# Generiert: 2026-09-28 10:21 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
 # WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 110 Rohdatensaetzen). Aussortiert: Waehrung 110, Impact 0, Datumsformat 0, vergangen 0.
