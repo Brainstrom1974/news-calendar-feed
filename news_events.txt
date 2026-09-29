@@ -1,10 +1,8 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-09-28 10:21 UTC
+# Generiert: 2026-09-29 10:17 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 110 Rohdatensaetzen). Aussortiert: Waehrung 110, Impact 0, Datumsformat 0, vergangen 0.
-2026-09-28 16:30|EUR|HIGH|ECB President Lagarde Speaks
-2026-09-29 08:00|JPY|HIGH|BOJ Core CPI y/y
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 103 Rohdatensaetzen). Aussortiert: Waehrung 103, Impact 0, Datumsformat 0, vergangen 0.
 2026-09-29 14:00|EUR|HIGH|ECB President Lagarde Speaks
 2026-09-30 15:30|USD|HIGH|Core PCE Price Index m/m
 2026-10-01 11:00|GBP|HIGH|BOE Gov Bailey Speaks
