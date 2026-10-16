@@ -1,7 +1,6 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-10-15 08:44 UTC
+# Generiert: 2026-10-16 08:39 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
 # WARNUNG: Quelle 'mql5' nicht abrufbar - Keine Variante lieferte eine verwertbare Antwort fuer 'mql5'.
-2026-10-16 05:00|GBP|HIGH|BOE Gov Bailey Speaks
 2026-10-17 09:45|GBP|HIGH|BOE Gov Bailey Speaks
