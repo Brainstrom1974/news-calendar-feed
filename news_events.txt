@@ -1,8 +1,8 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-11-02 11:54 UTC
+# Generiert: 2026-11-03 11:31 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 38 Rohdatensaetzen). Aussortiert: Waehrung 38, Impact 0, Datumsformat 0, vergangen 0.
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 36 Rohdatensaetzen). Aussortiert: Waehrung 36, Impact 0, Datumsformat 0, vergangen 0.
 2026-11-03 17:00|USD|HIGH|JOLTS Job Openings
 2026-11-05 12:00|EUR|HIGH|PPI m/m
 2026-11-05 14:00|GBP|HIGH|Official Bank Rate
@@ -10,5 +10,5 @@
 2026-11-05 20:00|EUR|HIGH|ECB President Lagarde Speaks
 2026-11-06 01:30|JPY|HIGH|Average Cash Earnings y/y
 2026-11-06 15:30|USD|HIGH|Average Hourly Earnings m/m
-2026-11-06 15:30|USD|HIGH|Unemployment Rate
 2026-11-06 15:30|USD|HIGH|Non-Farm Employment Change
+2026-11-06 15:30|USD|HIGH|Unemployment Rate
