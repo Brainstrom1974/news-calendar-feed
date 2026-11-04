@@ -1,9 +1,8 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-11-03 11:31 UTC
+# Generiert: 2026-11-04 11:46 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 36 Rohdatensaetzen). Aussortiert: Waehrung 36, Impact 0, Datumsformat 0, vergangen 0.
-2026-11-03 17:00|USD|HIGH|JOLTS Job Openings
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 33 Rohdatensaetzen). Aussortiert: Waehrung 33, Impact 0, Datumsformat 0, vergangen 0.
 2026-11-05 12:00|EUR|HIGH|PPI m/m
 2026-11-05 14:00|GBP|HIGH|Official Bank Rate
 2026-11-05 14:30|GBP|HIGH|BOE Gov Bailey Speaks
