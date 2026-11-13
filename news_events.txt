@@ -1,8 +1,7 @@
 # Automatisch generiert von fetch_news_calendar.py - NICHT manuell editieren
-# Generiert: 2026-11-12 12:01 UTC
+# Generiert: 2026-11-13 11:45 UTC
 # Format: YYYY-MM-DD HH:MM|CCY|IMPACT|Event-Name (Zeit in GMT/UTC)
 # Quellen: forex-factory, mql5 | Fenster: 10 Tage | nur kuenftige Events
-# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 18 Rohdatensaetzen). Aussortiert: Waehrung 18, Impact 0, Datumsformat 0, vergangen 0.
-2026-11-12 21:30|EUR|HIGH|ECB President Lagarde Speaks
+# WARNUNG: Quelle 'mql5' lieferte 0 kuenftige High-Impact-Events fuer ['CNH', 'CNY', 'HKD'] (von 16 Rohdatensaetzen). Aussortiert: Waehrung 16, Impact 0, Datumsformat 0, vergangen 0.
 2026-11-13 15:30|USD|HIGH|Core PPI m/m
 2026-11-13 15:30|USD|HIGH|PPI m/m
